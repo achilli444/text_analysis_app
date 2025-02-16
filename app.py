@@ -7,6 +7,8 @@ from difflib import SequenceMatcher
 import os
 
 app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.jinja_env.auto_reload = True
 nlp = spacy.load('en_core_web_sm')
 
 def resolve_pronouns(text):
@@ -221,9 +223,16 @@ def get_shortest_variant(variants):
     """
     return min(variants, key=len)
 
+@app.after_request
+def add_header(response):
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '-1'
+    return response
+
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('index.html', version=os.urandom(8).hex())
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
