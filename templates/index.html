@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text Analysis Tool</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .text-inputs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            box-sizing: border-box;
+            margin-top: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #plot {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        .fact-list {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Text Analysis Tool</h1>
+    
+    <div class="text-inputs">
+        <div>
+            <label for="source_a">Source A:</label>
+            <textarea id="source_a" name="source_a"></textarea>
+        </div>
+        <div>
+            <label for="source_b">Source B:</label>
+            <textarea id="source_b" name="source_b"></textarea>
+        </div>
+        <div>
+            <label for="source_c">Source C:</label>
+            <textarea id="source_c" name="source_c"></textarea>
+        </div>
+    </div>
+
+    <button onclick="analyzeTexts()">Analyze Texts</button>
+
+    <div id="plot"></div>
+    <div id="fact-list" class="fact-list"></div>
+
+    <script>
+        function analyzeTexts() {
+            const formData = new FormData();
+            formData.append('source_a', document.getElementById('source_a').value);
+            formData.append('source_b', document.getElementById('source_b').value);
+            formData.append('source_c', document.getElementById('source_c').value);
+
+            fetch('/analyze', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Plot the graph
+                const plotData = JSON.parse(data.plot);
+                Plotly.newPlot('plot', plotData.data, plotData.layout);
+
+                // Add click event to show fact details
+                document.getElementById('plot').on('plotly_click', function(data) {
+                    const point = data.points[0];
+                    const factDetails = point.customdata;
+                    const message = `Original Text: ${factDetails[0]}\n` +
+                                  `Sources: ${factDetails[1]}\n\n` +
+                                  `All variations of this fact:\n${factDetails[2]}`;
+                    alert(message);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>

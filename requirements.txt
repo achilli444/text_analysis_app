@@ -1,0 +1,7 @@
+flask==3.0.0
+Django==4.2.19
+nltk==3.8.1
+spacy==3.7.2
+plotly==5.18.0
+pandas==2.1.4
+gunicorn==21.2.0
