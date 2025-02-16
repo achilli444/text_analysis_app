@@ -1,14 +1,43 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from functools import wraps
 import spacy
 import plotly.express as px
 import pandas as pd
 from collections import Counter
 from difflib import SequenceMatcher
 import os
+import time
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.jinja_env.auto_reload = True
+app.secret_key = 'your-secret-key-8080'  # Fixed secret key
+
+REQUIRED_PASSWORD = "Test_859"
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'authenticated' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        if request.form['password'] == REQUIRED_PASSWORD:
+            session['authenticated'] = True
+            return redirect(url_for('home'))
+        return render_template('login.html', error='Invalid password')
+    return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    session.pop('authenticated', None)
+    return redirect(url_for('login'))
+
 nlp = spacy.load('en_core_web_sm')
 
 def resolve_pronouns(text):
@@ -231,10 +260,13 @@ def add_header(response):
     return response
 
 @app.route('/')
+@login_required
 def home():
-    return render_template('index.html', version=os.urandom(8).hex())
+    timestamp = int(time.time())
+    return render_template('index.html', version=os.urandom(8).hex(), timestamp=timestamp)
 
 @app.route('/analyze', methods=['POST'])
+@login_required
 def analyze():
     texts = {
         'A': request.form.get('source_a', ''),

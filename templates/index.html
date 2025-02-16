@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Information Comparison Tool</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js?v=1643723400"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -15,6 +15,16 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+        }
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .logout-button {
+            background-color: #dc3545 !important;
+        }
+        .logout-button:hover {
+            background-color: #bb2d3b !important;
         }
         .text-inputs {
             display: grid;
@@ -87,7 +97,10 @@
 <body>
     <div class="header">
         <h1>Information Comparison Tool</h1>
-        <button onclick="showDirections()">Directions</button>
+        <div class="header-buttons">
+            <button onclick="showDirections()">Directions</button>
+            <button class="logout-button" onclick="window.location.href='/logout'">Logout</button>
+        </div>
     </div>
     <div class="text-inputs">
         <div>
